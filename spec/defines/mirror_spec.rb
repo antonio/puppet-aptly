@@ -139,4 +139,20 @@ describe 'aptly::mirror' do
       }
     end
   end
+
+  describe '#cmd_opts' do
+    context 'with custom command options' do
+      let(:params){{
+        :location   => 'http://repo.example.com',
+        :key        => 'ABC123',
+        :cmd_opts   => '-with-sources=false',
+      }}
+
+      it {
+        should contain_exec('aptly_mirror_create-example').with({
+          :command => /aptly mirror create -with-sources=false example http:\/\/repo\.example\.com precise$/,
+        })
+      }
+    end
+  end
 end

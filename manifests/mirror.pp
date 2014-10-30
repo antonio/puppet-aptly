@@ -38,8 +38,10 @@ define aptly::mirror (
   $keyserver = 'keyserver.ubuntu.com',
   $release = $::lsbdistcodename,
   $repos = [],
+  $cmd_opts = '',
 ) {
   validate_string($keyserver)
+  validate_string($cmd_opts)
   validate_array($repos)
 
   include aptly
@@ -55,6 +57,12 @@ define aptly::mirror (
     $components_arg = " ${components}"
   }
 
+  if empty($cmd_opts) {
+    $cmd_opts_arg = ''
+  } else {
+    $cmd_opts_arg = "${cmd_opts} "
+  }
+
   if !defined(Exec[$exec_key_title]) {
     exec { $exec_key_title:
       command => "${gpg_cmd} --keyserver '${keyserver}' --recv-keys '${key}'",
@@ -64,7 +72,7 @@ define aptly::mirror (
   }
 
   exec { "aptly_mirror_create-${title}":
-    command => "${aptly_cmd} create ${title} ${location} ${release}${components_arg}",
+    command => "${aptly_cmd} create ${cmd_opts_arg}${title} ${location} ${release}${components_arg}",
     unless  => "${aptly_cmd} show ${title} >/dev/null",
     user    => $::aptly::user,
     require => [
