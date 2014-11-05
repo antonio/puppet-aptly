@@ -62,9 +62,9 @@ define aptly::mirror (
   $exec_key_title = "aptly_mirror_key-${key}"
 
   if $sources {
-    $sources_arg = ' -with-sources'
+    $sources_arg = ' -with-sources=true'
   } else {
-    $sources_arg = ''
+    $sources_arg = ' -with-sources=false'
   }
 
   if empty($repos) {
