@@ -91,7 +91,7 @@ define aptly::mirror (
   }
 
   exec { "aptly_mirror_create-${title}":
-    command => "${aptly_cmd} create${sources_arg} ${title} ${location} ${release}${components_arg}",
+    command => rstrip("${aptly_cmd} create${sources_arg} ${title} ${location} ${release}${components_arg}"),
     unless  => "${aptly_cmd} show ${title} >/dev/null",
     user    => $::aptly::user,
     require => [
