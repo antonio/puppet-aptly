@@ -36,9 +36,9 @@
 #   mirroring all components.
 #   Default: []
 #
-# [*sources*]
-#   Mirror the sources with the -with-sources flag
-#   Default: false
+# [*cmd_opts*]
+#   Options passed to the aptly binary
+#   Default: ''
 #
 define aptly::mirror (
   $location,
@@ -47,12 +47,12 @@ define aptly::mirror (
   $key_content = '',
   $release = $::lsbdistcodename,
   $repos = [],
-  $sources = false,
+  $cmd_opts = '',
 ) {
 
   validate_string($keyserver)
+  validate_string($cmd_opts)
   validate_array($repos)
-  validate_bool($sources)
   validate_string($key_content)
 
   include aptly
@@ -61,17 +61,17 @@ define aptly::mirror (
   $aptly_cmd = '/usr/bin/aptly mirror'
   $exec_key_title = "aptly_mirror_key-${key}"
 
-  if $sources {
-    $sources_arg = ' -with-sources=true'
-  } else {
-    $sources_arg = ' -with-sources=false'
-  }
-
   if empty($repos) {
     $components_arg = ''
   } else {
     $components = join($repos, ' ')
     $components_arg = " ${components}"
+  }
+
+  if empty($cmd_opts) {
+    $cmd_opts_arg = ''
+  } else {
+    $cmd_opts_arg = "${cmd_opts} "
   }
 
   if !defined(Exec[$exec_key_title]) {
@@ -91,7 +91,7 @@ define aptly::mirror (
   }
 
   exec { "aptly_mirror_create-${title}":
-    command => rstrip("${aptly_cmd} create${sources_arg} ${title} ${location} ${release}${components_arg}"),
+    command => "${aptly_cmd} create ${cmd_opts_arg}${title} ${location} ${release}${components_arg}",
     unless  => "${aptly_cmd} show ${title} >/dev/null",
     user    => $::aptly::user,
     require => [
