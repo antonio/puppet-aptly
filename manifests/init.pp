@@ -58,7 +58,16 @@ class aptly (
       include_src => false,
     }
 
-    Apt::Source['aptly'] -> Package['aptly']
+    apt::source { 'aptly-nightly':
+      location    => 'http://repo.aptly.info',
+      release     => 'nightly',
+      repos       => 'main',
+      key_server  => $key_server,
+      key         => '2A194991',
+      include_src => false,
+    }
+
+    Apt::Source['aptly'] -> Apt::Source['aptly-nightly'] -> Package['aptly']
   }
 
   package { 'aptly':
