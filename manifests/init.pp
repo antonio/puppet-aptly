@@ -31,6 +31,7 @@ class aptly (
   $package_ensure = present,
   $config = {},
   $repo = true,
+  $repo_nightly = false,
   $key_server = undef,
   $user = 'root',
 ) {
@@ -56,8 +57,11 @@ class aptly (
       key_server  => $key_server,
       key         => '2A194991',
       include_src => false,
+      before      => Package['aptly'],
     }
+  }
 
+  if $repo_nightly {
     apt::source { 'aptly-nightly':
       location    => 'http://repo.aptly.info',
       release     => 'nightly',
@@ -65,9 +69,8 @@ class aptly (
       key_server  => $key_server,
       key         => '2A194991',
       include_src => false,
+      before      => Package['aptly'],
     }
-
-    Apt::Source['aptly'] -> Apt::Source['aptly-nightly'] -> Package['aptly']
   }
 
   package { 'aptly':
